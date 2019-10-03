@@ -247,13 +247,26 @@ void Gource::update(float t, float dt) {
     logic(runtime, scaled_dt);
 
     logic_time = SDL_GetTicks() - logic_time;
+    if (logic_time > 20) {
+      fprintf(stderr, "SLOW LOGIC TIME: %d\n", logic_time);
+    }
 
+    uint32_t start = SDL_GetTicks();
     draw(runtime, scaled_dt);
+    uint32_t end = SDL_GetTicks();
+    if (end - start > 20) {
+      fprintf(stderr, "SLOW DRAW TIME: %d\n", end - start);
+    }
 
     //extract frames based on frameskip setting if frameExporter defined
     if(frameExporter != 0 && commitlog && !gGourceSettings.shutdown) {
         if(framecount % (frameskip+1) == 0) {
+            start = SDL_GetTicks();
             frameExporter->dump();
+            end = SDL_GetTicks();
+            if (end - start > 20) {
+              fprintf(stderr, "SLOW DUMP TIME: %d\n", end - start);
+            }
         }
     }
 
